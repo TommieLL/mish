@@ -40,7 +40,7 @@ int redirect(char *filename, int flags, int destfd){
 	int f;
 	if((f = open(filename,flags, S_IRUSR | S_IWUSR) < 0)){
 		return -1;
-	}
+		
 	else if(dup2(f,destfd)<0) {
 		return -1;
 	}

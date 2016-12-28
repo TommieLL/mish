@@ -33,7 +33,7 @@ void signal_handler(int sig)
 		    continue;
 		}
 		if(kill(pid[i], sig) < 0) {
-		    errno(sig);
+		    perror(sig);
 		}
 		
 		pid[i] = -1;

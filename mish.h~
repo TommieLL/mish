@@ -29,7 +29,7 @@
 /*
  * A list of all running processes.
  */
-extern pid_t pid[MAXCOMMANDS];
+extern pid_t pid_array[MAXCOMMANDS];
 
 /*
  * A function pointer to builtin command
