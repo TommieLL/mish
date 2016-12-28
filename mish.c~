@@ -36,7 +36,7 @@ void prompt(void)
  * Purpose: The main loop.
  */
 void run(){
-    size_t bufsize = MAXLINELEN;
+  size_t bufsize = MAXLINELEN;
     char *buf = malloc(bufsize);
     command cmd[MAXCOMMANDS];
     int numCommands;
