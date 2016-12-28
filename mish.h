@@ -21,7 +21,7 @@
 /*
  * Included files.
  */
-#include "sighant.h"
+#include "parser.h"
 #include "execute.h"
 #include "sighant.h"
 
@@ -31,6 +31,12 @@
  */
 extern pid_t pid[MAXCOMMANDS];
 
+/*
+ * Return values for builtin commands
+ */
+typedef enum internal {
+    INTERNAL_COMMAND_EXIT = -1, INTERNAL_COMMAND_SUCCESS, NO_INTERNAL_COMMAND
+} internal_command;
 /*
  * A function pointer to builtin command
  */

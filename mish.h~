@@ -29,8 +29,14 @@
 /*
  * A list of all running processes.
  */
-extern pid_t pid_array[MAXCOMMANDS];
+extern pid_t pid[MAXCOMMANDS];
 
+/*
+ * Return values for builtin commands
+ */
+typedef enum internal {
+    INTERNAL_COMMAND_EXIT = -1, INTERNAL_COMMAND_SUCCESS, NO_INTERNAL_COMMAND
+} internal_command;
 /*
  * A function pointer to builtin command
  */

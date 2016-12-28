@@ -1,16 +1,4 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <linux/limits.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <dirent.h>
-#include <string.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <errno.h>
-#include "mish.h"
+
 
 pid_t pid[MAXCOMMANDS];
 
@@ -109,7 +97,8 @@ void action(int numCommands, command *cmd){
             }
 
             if (execvp(cmd[i].argv[0], cmd[i].argv) < 0) {
-                print_errno();
+                perror(execvp);
+                //print_errno();
                 exit(EXIT_FAILURE);
             }
         } else {
@@ -120,7 +109,8 @@ void action(int numCommands, command *cmd){
 
             if (close(pipes[(i+1)%2][WRITE_END]) < 0 ||
                 close(pipes[(i+1)%2][READ_END]) < 0) {
-                print_errno();
+                perror(close);
+                //print_errno();
             }
         }
     }
@@ -130,7 +120,7 @@ void action(int numCommands, command *cmd){
 
         do {
             waitpid(pid[i], &status, 0);
-        }  while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        }  while (!WIFEXITED(inc) && !WIFSIGNALED(inc));
 
         pid[i] = -1;
     }

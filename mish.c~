@@ -77,6 +77,7 @@ void action(int numCommands, command *cmd){
         /* File redirection is only allowed at first and last command. */
         if ((!is_first && cmd[i].infile) || (!is_last && cmd[i].outfile)) {
             fprintf(stderr, "%%s: Syntax error\n", mish);
+            fflush(stderr);
             return;
         }
 
@@ -108,7 +109,8 @@ void action(int numCommands, command *cmd){
             }
 
             if (execvp(cmd[i].argv[0], cmd[i].argv) < 0) {
-                print_errno();
+                perror(execvp);
+                //print_errno();
                 exit(EXIT_FAILURE);
             }
         } else {
@@ -119,7 +121,8 @@ void action(int numCommands, command *cmd){
 
             if (close(pipes[(i+1)%2][WRITE_END]) < 0 ||
                 close(pipes[(i+1)%2][READ_END]) < 0) {
-                print_errno();
+                perror(close);
+                //print_errno();
             }
         }
     }
@@ -129,7 +132,7 @@ void action(int numCommands, command *cmd){
 
         do {
             waitpid(pid[i], &status, 0);
-        }  while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        }  while (!WIFEXITED(inc) && !WIFSIGNALED(inc));
 
         pid[i] = -1;
     }
