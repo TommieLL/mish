@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -14,18 +13,20 @@
  *		destfd	the standard I/O file descriptor to be replaced
  * Returns:	-1 on error, else destfd
  */
-int dupPipe(int pip[2], int end, int destfd){
-	
-	if(dup2(pip[end], destfd) < 0){
-		return -1;
-	}
-	if(close(pip[WRITE_END]) < 0){
-		return -1;
-	}
-	if(close(pip[READ_END]) < 0){
-		return -1;
-	}
-	return destfd;
+int dupPipe(int pip[2], int end, int destfd) {
+    if (dup2(pip[end], destfd) < 0) {
+        return -1;
+    }
+
+    if (close(pip[WRITE_END]) < 0) {
+        return -1;
+    }
+
+    if (close(pip[READ_END]) < 0) {
+        return -1;
+    }
+
+    return destfd;
 }
 /* Redirect a standard I/O file descriptor to a file
  * Arguments:	filename	the file to/from which the standard I/O file
@@ -40,11 +41,11 @@ int redirect(char *filename, int flags, int destfd){
 	int f;
 	if((f = open(filename,flags, S_IRUSR | S_IWUSR) < 0)){
 		return -1;
-		
-	else if(dup2(f,destfd)<0) {
+	}
+    if(dup2(f,destfd)<0) {
 		return -1;
 	}
-	else if(close(f) < 0){
+	if(close(f) < 0){
 	    return -1;
 	}
 	

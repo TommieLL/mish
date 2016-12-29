@@ -64,7 +64,7 @@ void action(int numCommands, command *cmd){
 
         /* File redirection is only allowed at first and last command. */
         if ((!is_first && cmd[i].infile) || (!is_last && cmd[i].outfile)) {
-            fprintf(stderr, "mish%%s: Syntax error\n");
+            fprintf(stderr, "mish%% Syntax error\n");
             fflush(stderr);
             return;
         }
@@ -75,7 +75,7 @@ void action(int numCommands, command *cmd){
         }
 
         if ((pid[i] = fork()) < 0) {
-            fprintf(stderr,"mish%% Error creating pipe");
+            fprintf(stderr,"mish%% Error creating pipe\n");
             fflush(stderr);
         } else if (pid[i] == 0) {
             if (numCommands > 1) {
@@ -110,7 +110,7 @@ void action(int numCommands, command *cmd){
             if (close(pipes[(i+1)%2][WRITE_END]) < 0 ||
                 close(pipes[(i+1)%2][READ_END]) < 0) {
                 perror("close");
-                //print_errno();
+               
             }
         }
     }
@@ -132,7 +132,7 @@ void action(int numCommands, command *cmd){
 internal_command call_internal(char **argv){
     static const char *name[] = {"cd", "exit"};
     
-    static const internal ptr[] = {&cd, &internal_exit};
+    static const internal ptr[] = {&internal_cd, &internal_exit};
     
     for(int i = 0; i < 2; i++){
         if(strcmp(argv[0], name[i]) == 0){
@@ -147,7 +147,7 @@ internal_command call_internal(char **argv){
 /*
  * Purpose: If the command is internal.
  */
-internal_command cd(char **argv){
+internal_command internal_cd(char **argv){
     char *dir = argv[1] == NULL ? getenv("HOME") : argv[1];
     if (chdir(dir) != 0) {
         fprintf(stderr,"Change of diretory failed\n");

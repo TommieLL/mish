@@ -70,10 +70,10 @@ typedef internal_command (*internal)(char **);
 
 void prompt(void);
 void run(void);
-internal_command internal_exit(char **argv);
 void action(int numCommands, command *cmd);
+internal_command internal_exit(char **argv);
 internal_command call_internal(char **argv);
-internal_command cd(char **argv);
+internal_command internal_cd(char **argv);
 
 
 #endif

@@ -43,6 +43,8 @@
     exit_if_error(redirect(file, fd == STDIN_FILENO ? RDOPTS : WROPTS, fd))
 #define dup_partial(pip, fd) \
     exit_if_error(dupPipe(pip, fd == STDIN_FILENO ? READ_END : WRITE_END, fd))
+    
+
 #define redirect_stdin(infile) redirect_partial(infile, STDIN_FILENO)
 #define redirect_stdout(outfile) redirect_partial(outfile, STDOUT_FILENO)
 #define dup_stdin(pip) dup_partial(pip, STDIN_FILENO)
@@ -71,7 +73,7 @@ void run(void);
 internal_command internal_exit(char **argv);
 void action(int numCommands, command *cmd);
 internal_command call_internal(char **argv);
-internal_command cd(char **argv);
+internal_command internal_cd(char **argv);
 
 
 #endif
