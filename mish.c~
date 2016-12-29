@@ -80,20 +80,24 @@ void action(int numCommands, command *cmd){
         } else if (pid[i] == 0) {
             if (numCommands > 1) {
                 if (!is_last) {
-                    dup_stdout(pipes[i%2]);
+                    //dup_stdout(pipes[i%2]);
+                    dupPipe(pipes[i%2], STDOUT_FILENO == STDIN_FILENO ? READ_END : WRITE_END, STDOUT_FILENO)
                 }
                 
                 if (!is_first) {
-                    dup_stdin(pipes[(i+1)%2]);
+                    //dup_stdin(pipes[(i+1)%2]);
+                    dupPipe(pipes[(i+1)%2], STDIN_FILENO == STDIN_FILENO ? READ_END : WRITE_END, STDIN_FILENO)
                 }
             }
 
             if (is_first && cmd[i].infile) {
-                redirect_stdin(cmd[i].infile);
+                //redirect_stdin(cmd[i].infile);
+                redirect(cmd[i].infile, STDIN_FILENO == STDIN_FILENO ? RDOPTS : WROPTS, STDIN_FILENO);
             }
             
             if (is_last && cmd[i].outfile) {
-                redirect_stdout(cmd[i].outfile);
+                //redirect_stdout(cmd[i].outfile);
+                redirect(cmd[i].outfile, STDOUT_FILENO == STDIN_FILENO ? RDOPTS : WROPTS, STDOUT_FILENO);
             }
 
             if (execvp(cmd[i].argv[0], cmd[i].argv) < 0) {
@@ -132,7 +136,7 @@ void action(int numCommands, command *cmd){
 internal_command call_internal(char **argv){
     static const char *name[] = {"cd", "exit"};
     
-    static const internal ptr[] = {&cd, &internal_exit};
+    static const internal ptr[] = {&internal_cd, &internal_exit};
     
     for(int i = 0; i < 2; i++){
         if(strcmp(argv[0], name[i]) == 0){
