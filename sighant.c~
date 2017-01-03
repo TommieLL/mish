@@ -33,7 +33,7 @@ void handler(int sig) {
         }
 
         if (kill(pid[i], sig) < 0) {
-            perror("kill pid"9;
+            perror("kill pid");
         }
 
         pid[i] = -1;

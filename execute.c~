@@ -37,17 +37,21 @@ int dupPipe(int pip[2], int end, int destfd) {
  *			redirected
  * Returns:	-1 on error, else destfd
  */
-int redirect(char *filename, int flags, int destfd){
-	int f;
-	if((f = open(filename,flags, S_IRUSR | S_IWUSR) < 0)){
-		return -1;
-	}
-    if(dup2(f,destfd)<0) {
-		return -1;
-	}
-	if(close(f) < 0){
-	    return -1;
-	}
-	
-	return destfd;
+int redirect(char *filename, int flags, int destfd) {
+    int fd;
+
+    if ((fd = open(filename, flags, S_IRUSR | S_IWUSR)) < 0) {
+        return -1;
+    }
+
+    if (dup2(fd, destfd) < 0) {
+        return -1;
+    }
+
+    if (close(fd) < 0) {
+        return -1;
+    }
+
+    return destfd;
 }
+

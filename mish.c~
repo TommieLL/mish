@@ -31,10 +31,10 @@ void run(void){
     internal_command inc;
 
     do {
+        
         prompt();
 
         if (getline(&buffer, &bufferSize, stdin) == EOF) {
-            //printf("");
             break;
         }
 
@@ -53,7 +53,8 @@ void run(void){
     free(buffer);
 }
  /*
-  * Purpose: Fuckin fork.
+  * Purpose: To fork if it's a child process 
+  * and execute commands from args/input
   */
 void action(int numCommands, command *cmd){
    int pipes[2][2];
@@ -64,46 +65,66 @@ void action(int numCommands, command *cmd){
 
         /* File redirection is only allowed at first and last command. */
         if ((!is_first && cmd[i].infile) || (!is_last && cmd[i].outfile)) {
-            fprintf(stderr, "mish%% Syntax error\n");
+            fprintf(stderr, "Syntax error\n");
             fflush(stderr);
             return;
         }
 
         if (!is_last && pipe(pipes[i%2]) < 0) {
-            fprintf(stderr,"mish%% Error creating pipe\n");
+            fprintf(stderr,"Error creating pipe\n");
             fflush(stderr);
         }
 
         if ((pid[i] = fork()) < 0) {
-            fprintf(stderr,"mish%% Error creating pipe\n");
+            fprintf(stderr,"Error creating pipe\n");
             fflush(stderr);
         } else if (pid[i] == 0) {
             if (numCommands > 1) {
                 if (!is_last) {
-                    //dup_stdout(pipes[i%2]);
-                    dupPipe(pipes[i%2], STDOUT_FILENO == STDIN_FILENO ? READ_END : WRITE_END, STDOUT_FILENO)
+                    
+                    if(dupPipe(pipes[i%2], STDOUT_FILENO == STDIN_FILENO ?
+                     READ_END : WRITE_END, STDOUT_FILENO) < 0){
+                    fprintf(stderr, "%d: %s\n",STDOUT_FILENO, strerror(errno));
+                    fflush(stderr);
+                    _exit(EXIT_FAILURE);
+                    }
                 }
                 
                 if (!is_first) {
-                    //dup_stdin(pipes[(i+1)%2]);
-                    dupPipe(pipes[(i+1)%2], STDIN_FILENO == STDIN_FILENO ? READ_END : WRITE_END, STDIN_FILENO)
+                    
+                    if(dupPipe(pipes[(i+1)%2], STDIN_FILENO == STDIN_FILENO ?
+                     READ_END : WRITE_END, STDIN_FILENO) < 0){
+                        fprintf(stderr, "%d: %s\n",STDIN_FILENO, strerror(errno));
+                        fflush(stderr);
+                        _exit(EXIT_FAILURE);
+                    }
                 }
             }
 
             if (is_first && cmd[i].infile) {
-                //redirect_stdin(cmd[i].infile);
-                redirect(cmd[i].infile, STDIN_FILENO == STDIN_FILENO ? RDOPTS : WROPTS, STDIN_FILENO);
+                
+                if(redirect(cmd[i].infile, STDIN_FILENO == STDIN_FILENO ?
+                 RDOPTS : WROPTS, STDIN_FILENO) < 0){
+                    fprintf(stderr, "%s: %s\n",cmd[i].infile, strerror(errno));
+                    fflush(stderr);
+                    _exit(EXIT_FAILURE);
+                }
             }
             
             if (is_last && cmd[i].outfile) {
-                //redirect_stdout(cmd[i].outfile);
-                redirect(cmd[i].outfile, STDOUT_FILENO == STDIN_FILENO ? RDOPTS : WROPTS, STDOUT_FILENO);
+                
+                if(redirect(cmd[i].outfile, STDOUT_FILENO == STDIN_FILENO ?
+                 RDOPTS : WROPTS, STDOUT_FILENO) < 0){
+                    fprintf(stderr, "%s: %s\n",cmd[i].outfile, strerror(errno));
+                    fflush(stderr);
+                    _exit(EXIT_FAILURE);
+                }
             }
 
             if (execvp(cmd[i].argv[0], cmd[i].argv) < 0) {
-                perror("execvp");
-                //print_errno();
-                exit(EXIT_FAILURE);
+                fprintf(stderr, "%s: %s\n",cmd[i].argv[0], strerror(errno));
+                fflush(stderr);
+                _exit(EXIT_FAILURE);
             }
         } else {
             /* We create numCommands-1 pipes in total, skip close once. */
@@ -113,7 +134,8 @@ void action(int numCommands, command *cmd){
 
             if (close(pipes[(i+1)%2][WRITE_END]) < 0 ||
                 close(pipes[(i+1)%2][READ_END]) < 0) {
-                perror("close");
+                fprintf(stderr, "close: %s\n", strerror(errno));
+                fflush(stderr);
                
             }
         }
@@ -134,9 +156,9 @@ void action(int numCommands, command *cmd){
  * Returns: Value of the internal command or -1 if it's not an internal command.
  */
 internal_command call_internal(char **argv){
-    static const char *name[] = {"cd", "exit"};
+    static const char *name[] = {"cd","echo"};
     
-    static const internal ptr[] = {&internal_cd, &internal_exit};
+    static const internal ptr[] = {&internal_cd, &internal_echo};
     
     for(int i = 0; i < 2; i++){
         if(strcmp(argv[0], name[i]) == 0){
@@ -149,23 +171,27 @@ internal_command call_internal(char **argv){
 }
 
 /*
- * Purpose: If the command is internal.
+ * Purpose: Change directory.
  */
 internal_command internal_cd(char **argv){
-    char *dir = argv[1] == NULL ? getenv("HOME") : argv[1];
-    if (chdir(dir) != 0) {
-        fprintf(stderr,"Change of diretory failed\n");
+    if (chdir(argv[1]) != 0) {
+        fprintf(stderr, "cd: %s: %s\n",argv[1], strerror(errno));
         fflush(stderr);
 	}
 	return INTERNAL_COMMAND_SUCCESS;
 }
 
-/*
- * exit - Exit mish
- */
-internal_command internal_exit(char **argv) {
+internal_command internal_echo(char **argv){
+    int i = 1;
+    while(argv[i] != NULL){
+    char *output= argv[i+1] == NULL ? "%s" : "%s ";
+    fprintf(stdout,output,argv[i]);
     argv++;
-        return INTERNAL_COMMAND_EXIT;
+    }
     
+    fprintf(stdout,"\n");
+    fflush(stdout);
+    return INTERNAL_COMMAND_SUCCESS;
 }
+
 

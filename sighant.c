@@ -33,7 +33,8 @@ void handler(int sig) {
         }
 
         if (kill(pid[i], sig) < 0) {
-            perror("kill pid");
+            fprintf(stderr, "kill: %d %s\n",pid[i], strerror(errno));
+            fflush(stderr);
         }
 
         pid[i] = -1;
