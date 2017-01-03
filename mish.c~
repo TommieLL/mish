@@ -188,7 +188,6 @@ internal_command internal_echo(char **argv){
     fprintf(stdout,output,argv[i]);
     argv++;
     }
-    
     fprintf(stdout,"\n");
     fflush(stdout);
     return INTERNAL_COMMAND_SUCCESS;

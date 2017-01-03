@@ -181,6 +181,9 @@ internal_command internal_cd(char **argv){
 	return INTERNAL_COMMAND_SUCCESS;
 }
 
+/*
+ * Purpose: A internal "echo" function.
+ */
 internal_command internal_echo(char **argv){
     int i = 1;
     while(argv[i] != NULL){
